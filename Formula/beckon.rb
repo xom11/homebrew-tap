@@ -1,33 +1,80 @@
 class Beckon < Formula
   desc "Cross-platform focus-or-launch app switcher"
   homepage "https://github.com/xom11/beckon"
-  version "0.5.2"
+  version "0.5.3"
   license any_of: ["Apache-2.0", "MIT"]
 
   on_macos do
     on_arm do
       url "https://github.com/xom11/beckon/releases/download/v#{version}/beckon-#{version}-aarch64-apple-darwin.tar.gz"
-      sha256 "269fff15e39130bb94c936f9aee539808df38915743602767d9670c003ae2834"
+      sha256 "5538a541e177a61e2ad3d6fe4cc2b3c1195e63191e1f8daa7f3dd278d491cb55"
     end
     on_intel do
       url "https://github.com/xom11/beckon/releases/download/v#{version}/beckon-#{version}-x86_64-apple-darwin.tar.gz"
-      sha256 "4986f0f106a60ff53411f25264266a8d4743c402c040ec39d0e35dee407485e8"
+      sha256 "88707ec5b5e62ab3faa98824cf3f98107087865495a79688be791cca1a57648c"
     end
   end
 
   on_linux do
     on_arm do
       url "https://github.com/xom11/beckon/releases/download/v#{version}/beckon-#{version}-aarch64-unknown-linux-gnu.tar.gz"
-      sha256 "715a89f00b77d2c6ab7c1eefe68943dba0e098e4d612e4501a088530345faf49"
+      sha256 "22878478a3275c094750eaab32a329187fb04cf6ef1fac9f5523ee8961e93864"
     end
     on_intel do
       url "https://github.com/xom11/beckon/releases/download/v#{version}/beckon-#{version}-x86_64-unknown-linux-gnu.tar.gz"
-      sha256 "8fdba3d4abca608fbc5f67c0efa6b2bcc30f5e860f902d9d6bea64bf9950cceb"
+      sha256 "659961ebb5e004c057cc514f66676badb54ccc291b1189ff7ab5dbae62a1a097"
     end
   end
 
   def install
     bin.install "beckon"
+  end
+
+  # `--serve` (the resident hotkey host) exists only on macOS and Windows; on
+  # Linux the compositor owns the keybind, so there is deliberately no service
+  # there. `OS.mac?` is evaluated when the formula is loaded, so on Linux no
+  # service is registered at all and beckon never appears in
+  # `brew services list`.
+  #
+  # Do NOT nest this in `on_macos do` — `brew style` and `brew audit --strict`
+  # both reject that outright ("on_macos cannot include service"), and no
+  # formula in homebrew-core does it. Do NOT "simplify" it to `run macos:`
+  # either: that leaves `service?` true on Linux, so `brew services start`
+  # there fails with "has not implemented #plist, #service or provided a
+  # locatable service file" — a broken service instead of no service.
+  #
+  # `log_path` uses `var`, not `Dir.home`: Homebrew creates a referenced
+  # `#{var}/log` directory at install time and gives a home-relative path no
+  # such treatment, which would leave launchd failing to open it in silence.
+  if OS.mac?
+    service do
+      run [opt_bin/"beckon", "--serve", "#{Dir.home}/.config/beckon/apps.toml"]
+      keep_alive true
+      process_type :interactive
+      log_path var/"log/beckon.log"
+      error_log_path var/"log/beckon.log"
+    end
+  end
+
+  def caveats
+    return unless OS.mac?
+
+    <<~EOS
+      Resident hotkey mode reads a shortcuts file. Create and validate it
+      BEFORE starting the service — keep_alive restarts a serve that cannot
+      read its config every ~10 seconds, forever:
+
+        mkdir -p ~/.config/beckon
+        printf '"ctrl+super+alt+t" = "kitty"\\n' > ~/.config/beckon/apps.toml
+        beckon --check ~/.config/beckon/apps.toml
+        brew services start beckon
+
+      Do not use `sudo brew services start`: that installs a LaunchDaemon,
+      which has no window-server session, so hotkeys register and never fire.
+
+      Focusing other apps needs Accessibility permission:
+      System Settings -> Privacy & Security -> Accessibility.
+    EOS
   end
 
   test do
