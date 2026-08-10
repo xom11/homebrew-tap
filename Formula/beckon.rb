@@ -1,28 +1,28 @@
 class Beckon < Formula
   desc "Cross-platform focus-or-launch app switcher"
   homepage "https://github.com/xom11/beckon"
-  version "0.5.4"
+  version "0.6.0"
   license any_of: ["Apache-2.0", "MIT"]
 
   on_macos do
     on_arm do
       url "https://github.com/xom11/beckon/releases/download/v#{version}/beckon-#{version}-aarch64-apple-darwin.tar.gz"
-      sha256 "d2a872ecffd440855c8977181ff104cdc1ffdfb599676be42bd5f99323ca146b"
+      sha256 "a373078a5fb37b8417b662b1cefe7d964202990dd1818c18d050828d7aeada81"
     end
     on_intel do
       url "https://github.com/xom11/beckon/releases/download/v#{version}/beckon-#{version}-x86_64-apple-darwin.tar.gz"
-      sha256 "02a9a5d90863d967feb93b01e66a7a18c7c31273b234d45be8be351240e43c87"
+      sha256 "5a1838032a85df446415465990bbdbf6681498dcb757fd135140fcd9e5705a81"
     end
   end
 
   on_linux do
     on_arm do
       url "https://github.com/xom11/beckon/releases/download/v#{version}/beckon-#{version}-aarch64-unknown-linux-gnu.tar.gz"
-      sha256 "a309acfb1af41146f120231ac594ffda0800cc46ef26ec068d9d2da808b06973"
+      sha256 "507898a32da20090efe5e93debbb97f1f1ade7860d7bfccce75c621968f3a116"
     end
     on_intel do
       url "https://github.com/xom11/beckon/releases/download/v#{version}/beckon-#{version}-x86_64-unknown-linux-gnu.tar.gz"
-      sha256 "aeafad3ccf6302e0e9fa72a585952fa91180271d9b83e0f3f65a0cafe3fa7fe1"
+      sha256 "ed56401ceee56c3899eb3fb3c32f83edc75e81ff42210b2559bac0c2b6d4eef7"
     end
   end
 
@@ -30,7 +30,7 @@ class Beckon < Formula
     bin.install "beckon"
   end
 
-  # `--serve` (the resident hotkey host) exists only on macOS and Windows; on
+  # `serve` (the resident hotkey host) exists only on macOS and Windows; on
   # Linux the compositor owns the keybind, so there is deliberately no service
   # there. `OS.mac?` is evaluated when the formula is loaded, so on Linux no
   # service is registered at all and beckon never appears in
@@ -48,7 +48,7 @@ class Beckon < Formula
   # such treatment, which would leave launchd failing to open it in silence.
   if OS.mac?
     service do
-      run [opt_bin/"beckon", "--serve", "#{Dir.home}/.config/beckon/apps.toml"]
+      run [opt_bin/"beckon", "serve", "#{Dir.home}/.config/beckon/apps.toml"]
       keep_alive true
       process_type :interactive
       log_path var/"log/beckon.log"
@@ -66,7 +66,7 @@ class Beckon < Formula
 
         mkdir -p ~/.config/beckon
         printf '"ctrl+super+alt+t" = "kitty"\\n' > ~/.config/beckon/apps.toml
-        beckon --check ~/.config/beckon/apps.toml
+        beckon check ~/.config/beckon/apps.toml
         brew services start beckon
 
       Do not use `sudo brew services start`: that installs a LaunchDaemon,
