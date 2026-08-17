@@ -1,28 +1,28 @@
 class Beckon < Formula
   desc "Cross-platform focus-or-launch app switcher"
   homepage "https://github.com/xom11/beckon"
-  version "0.9.6"
+  version "0.9.7"
   license any_of: ["Apache-2.0", "MIT"]
 
   on_macos do
     on_arm do
       url "https://github.com/xom11/beckon/releases/download/v#{version}/beckon-#{version}-aarch64-apple-darwin.tar.gz"
-      sha256 "3739dfd512e1e094e3941868a0a9cf8f008a2f7c0b914b4dd42f214eae2c5cfa"
+      sha256 "0d745bc295754da87d8570be9f19924e6b8302f340bd85ea66957313a5e76088"
     end
     on_intel do
       url "https://github.com/xom11/beckon/releases/download/v#{version}/beckon-#{version}-x86_64-apple-darwin.tar.gz"
-      sha256 "51c6fd4f8f57cf63dfb58bc7af438af6c915918f968eea85102211065973aca2"
+      sha256 "b29a2d3c70072ecc32d3c89c367c88bfd9601e492302e9eef7128949f08a1959"
     end
   end
 
   on_linux do
     on_arm do
       url "https://github.com/xom11/beckon/releases/download/v#{version}/beckon-#{version}-aarch64-unknown-linux-gnu.tar.gz"
-      sha256 "65e6b7e4a46338f147002fbbfae7a5268f851f1aa776df6c11bd764631506227"
+      sha256 "25dd97b5040d3df553b4e0ac7d1171b32331a8512bf8507a350a7d5388589fb5"
     end
     on_intel do
       url "https://github.com/xom11/beckon/releases/download/v#{version}/beckon-#{version}-x86_64-unknown-linux-gnu.tar.gz"
-      sha256 "763eb430a91d2b8b0de7b2a69fc3ad846c8feb77878b05f4601ef806f5f9dff6"
+      sha256 "a4d1cbc871b90ffb4ce98d8689aa02bba49c5921e20bb5550a89b1eb7ac42d30"
     end
   end
 
@@ -48,8 +48,24 @@ class Beckon < Formula
   # such treatment, which would leave launchd failing to open it in silence.
   if OS.mac?
     service do
-      run [opt_bin/"beckon", "serve", "#{Dir.home}/.config/beckon/apps.toml"]
-      keep_alive true
+      # `--log` here is a DECLARATION, not a redirect: launchd already writes
+      # this file through the two paths below, and beckon must not be a second
+      # writer on the same fd. It is passed so the tray's `Open log` and the
+      # System page's log row can be drawn at all -- without it beckon has no
+      # way to learn where launchd put the file, and both were omitted over a
+      # log that exists. Keep the three paths identical.
+      run [opt_bin/"beckon", "serve", "#{Dir.home}/.config/beckon/apps.toml",
+           "--log", var/"log/beckon.log"]
+      # `successful_exit: false`, NOT `true`. Plain `keep_alive true` restarts
+      # on ANY exit, including a clean one -- which silently undoes beckon's
+      # own tray Quit. `beckon_macos::tray::request_quit` ends with
+      # `std::process::exit(0)`, so launchd had the daemon back inside
+      # `ThrottleInterval`, forever, and the menu item a user reaches for to
+      # stop beckon did nothing they could see. Restart a crash; respect a
+      # deliberate exit. The config-failure path below is unaffected: an
+      # unreadable or missing file still exits non-zero, so launchd still
+      # retries it.
+      keep_alive successful_exit: false
       process_type :interactive
       log_path var/"log/beckon.log"
       error_log_path var/"log/beckon.log"
