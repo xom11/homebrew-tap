@@ -1,28 +1,28 @@
 class Beckon < Formula
   desc "Cross-platform focus-or-launch app switcher"
   homepage "https://github.com/xom11/beckon"
-  version "0.9.7"
+  version "0.9.8"
   license any_of: ["Apache-2.0", "MIT"]
 
   on_macos do
     on_arm do
       url "https://github.com/xom11/beckon/releases/download/v#{version}/beckon-#{version}-aarch64-apple-darwin.tar.gz"
-      sha256 "0d745bc295754da87d8570be9f19924e6b8302f340bd85ea66957313a5e76088"
+      sha256 "1c8827afa053d52649988fce43e2922c98fbcef44bc04b70d4260c776d59752b"
     end
     on_intel do
       url "https://github.com/xom11/beckon/releases/download/v#{version}/beckon-#{version}-x86_64-apple-darwin.tar.gz"
-      sha256 "b29a2d3c70072ecc32d3c89c367c88bfd9601e492302e9eef7128949f08a1959"
+      sha256 "e9e2e10e0e5088f2df548a45027833edf2c541f13208503d4422a3cd2a90a746"
     end
   end
 
   on_linux do
     on_arm do
       url "https://github.com/xom11/beckon/releases/download/v#{version}/beckon-#{version}-aarch64-unknown-linux-gnu.tar.gz"
-      sha256 "25dd97b5040d3df553b4e0ac7d1171b32331a8512bf8507a350a7d5388589fb5"
+      sha256 "ac5bc6ba41cd9aedf7e3c49f205859a4c964262def6f1b681084654f6d999b84"
     end
     on_intel do
       url "https://github.com/xom11/beckon/releases/download/v#{version}/beckon-#{version}-x86_64-unknown-linux-gnu.tar.gz"
-      sha256 "a4d1cbc871b90ffb4ce98d8689aa02bba49c5921e20bb5550a89b1eb7ac42d30"
+      sha256 "f184fffbb13521bad8f8a37148c60614ce86a58771c129c03a9005350732a81c"
     end
   end
 
