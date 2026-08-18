@@ -5,33 +5,55 @@ class Beckon < Formula
   # jargon to anyone who has not already used beckon.
   desc "One key per app: launch, focus or cycle windows on macOS, Windows and Linux"
   homepage "https://github.com/xom11/beckon"
-  version "0.9.17"
+  version "0.9.18"
   license any_of: ["Apache-2.0", "MIT"]
 
   on_macos do
     on_arm do
       url "https://github.com/xom11/beckon/releases/download/v#{version}/beckon-#{version}-aarch64-apple-darwin.tar.gz"
-      sha256 "932942f737aa67d57a771efdb4dfcc5947eae94514fef4c5a14abb0d926014e3"
+      sha256 "8acd20b1725c77bb38e38d60fb4f78a49d6f24532ec5d7e7505209f013ac065f"
     end
     on_intel do
       url "https://github.com/xom11/beckon/releases/download/v#{version}/beckon-#{version}-x86_64-apple-darwin.tar.gz"
-      sha256 "77d8ce43b7cb4a348a8993172e7587a644a4df82515a3823f3f3708a5c154134"
+      sha256 "80f4793468a881234221f71b82eb0f21a36361ec7b49fcf37aca521ec5e4a771"
     end
   end
 
   on_linux do
     on_arm do
       url "https://github.com/xom11/beckon/releases/download/v#{version}/beckon-#{version}-aarch64-unknown-linux-gnu.tar.gz"
-      sha256 "50e2df68d619cda2793fcf1a5f74e802ae2f49ebcb57408ec8f03fa5513318fd"
+      sha256 "9848da9d01a53ad25da0ffab35bb33f71c60f946bdbd5d752b0ad753f9254529"
     end
     on_intel do
       url "https://github.com/xom11/beckon/releases/download/v#{version}/beckon-#{version}-x86_64-unknown-linux-gnu.tar.gz"
-      sha256 "a83bc527fbfaf04ad41afcfc9894cfda09769eea966585c89627469bc5e3ee09"
+      sha256 "4c8f0c60875568648a22162b19259e3eebac72986a44bbe11dd58b9c3e053674"
     end
   end
 
+  # **macOS installs the .app; Linux installs the bare binary**, because the two
+  # tarballs differ and the reason is not packaging taste.
+  #
+  # macOS records an Accessibility grant against a bundle IDENTIFIER when the
+  # process has one and against its ABSOLUTE PATH when it does not. A path-keyed
+  # grant cannot survive an upgrade here, because this very formula puts the
+  # version in the path: v0.9.17 lost the grant v0.9.16 had, signed identically,
+  # with nobody touching System Settings. Installing the bundle is what moves
+  # beckon into the identifier column, beside every ordinary app.
+  #
+  # `bin/beckon` is a SYMLINK into the bundle rather than a second copy, so the
+  # CLI and the service are one file with one identity -- measured: running the
+  # executable inside a bundle directly, without `open`, still gets the bundle's
+  # identifier. Two copies would be two identities and two grants, and could
+  # drift to two versions.
+  #
+  # Linux has no bundles and no TCC; its tarball ships the binary alone.
   def install
-    bin.install "beckon"
+    if OS.mac?
+      prefix.install "beckon.app"
+      bin.install_symlink prefix/"beckon.app/Contents/MacOS/beckon" => "beckon"
+    else
+      bin.install "beckon"
+    end
   end
 
   # `serve` (the resident hotkey host) exists only on macOS and Windows; on
@@ -58,7 +80,13 @@ class Beckon < Formula
       # System page's log row can be drawn at all -- without it beckon has no
       # way to learn where launchd put the file, and both were omitted over a
       # log that exists. Keep the three paths identical.
-      run [opt_bin/"beckon", "serve", "#{Dir.home}/.config/beckon/apps.toml",
+      # **The executable INSIDE the bundle, not `opt_bin/"beckon"`.** Both
+      # resolve to the same file today, but only this spelling says why the
+      # bundle exists -- and it does not depend on the `bin` symlink surviving a
+      # future edit to `install`. The identity launchd hands TCC comes from the
+      # enclosing `.app`, so the path must go through it.
+      run [opt_prefix/"beckon.app/Contents/MacOS/beckon", "serve",
+           "#{Dir.home}/.config/beckon/apps.toml",
            "--log", var/"log/beckon.log"]
       # `successful_exit: false`, NOT `true`. Plain `keep_alive true` restarts
       # on ANY exit, including a clean one -- which silently undoes beckon's
