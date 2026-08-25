@@ -5,28 +5,28 @@ class Beckon < Formula
   # jargon to anyone who has not already used beckon.
   desc "One key per app: launch, focus or cycle windows on macOS, Windows and Linux"
   homepage "https://github.com/xom11/beckon"
-  version "0.11.0"
+  version "0.11.1"
   license any_of: ["Apache-2.0", "MIT"]
 
   on_macos do
     on_arm do
       url "https://github.com/xom11/beckon/releases/download/v#{version}/beckon-#{version}-aarch64-apple-darwin.tar.gz"
-      sha256 "47e30cf4c68ce150cfe5df9204dea4a79326dfc8e69a6a619de32318a7aaba83"
+      sha256 "6a7fc45ac355771dd559923c3706071ae249cdeef303f9ca06276e465820343e"
     end
     on_intel do
       url "https://github.com/xom11/beckon/releases/download/v#{version}/beckon-#{version}-x86_64-apple-darwin.tar.gz"
-      sha256 "11c30607eab162d0a27002410abbded8fcd196695b09f1358c2b018bbfc18e4d"
+      sha256 "b31a3b58481ec272c33c8b7bb3b5b6b2ca5d8151157d431a91af10915f31ad76"
     end
   end
 
   on_linux do
     on_arm do
       url "https://github.com/xom11/beckon/releases/download/v#{version}/beckon-#{version}-aarch64-unknown-linux-gnu.tar.gz"
-      sha256 "13c1363e750d6d3c43bcca189eeea47d3401517f05a6f55471f1797e305beb42"
+      sha256 "6a99d035dd1a76bbe1c015dd04dfdc41104287e42b29041a99dbc3b347c78178"
     end
     on_intel do
       url "https://github.com/xom11/beckon/releases/download/v#{version}/beckon-#{version}-x86_64-unknown-linux-gnu.tar.gz"
-      sha256 "5d473c05527d46e3c0d16a3214b3bab6d56b20c38a1495eb7696d754ceca07e6"
+      sha256 "ce17a44e60649541dff0655547f1a3f70cd3fb4a801edf439610e05418982846"
     end
   end
 
