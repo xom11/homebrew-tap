@@ -5,28 +5,28 @@ class Beckon < Formula
   # jargon to anyone who has not already used beckon.
   desc "One key per app: launch, focus or cycle windows on macOS, Windows and Linux"
   homepage "https://github.com/xom11/beckon"
-  version "0.15.2"
+  version "0.16.0"
   license any_of: ["Apache-2.0", "MIT"]
 
   on_macos do
     on_arm do
       url "https://github.com/xom11/beckon/releases/download/v#{version}/beckon-#{version}-aarch64-apple-darwin.tar.gz"
-      sha256 "b9957f19a93bbcf3953a82fe8ef005d6a4b3d3c187eb061e8ab4b20de1dc8e4e"
+      sha256 "43e7e6f2eca064a649be4910568d6972374bb23277fcdbe5d6c7e6176ad52434"
     end
     on_intel do
       url "https://github.com/xom11/beckon/releases/download/v#{version}/beckon-#{version}-x86_64-apple-darwin.tar.gz"
-      sha256 "9242628e28f8f2b88440ae15d66427ff6360a4c1cf02a06dfd41e72edfb76fc7"
+      sha256 "cc2b3b0a3a84faec99a78269ddec7e4a219ef65eac914f9d3b40d1f5aff245ec"
     end
   end
 
   on_linux do
     on_arm do
       url "https://github.com/xom11/beckon/releases/download/v#{version}/beckon-#{version}-aarch64-unknown-linux-gnu.tar.gz"
-      sha256 "7f1cd335b725361fbc6c5ded8fb221b2d9073f43dc94cce4a0e79aed17712974"
+      sha256 "e929f96e62fe1c7e5482d26a6e1d00626bc7fba239f2194924ecab2f3ab105da"
     end
     on_intel do
       url "https://github.com/xom11/beckon/releases/download/v#{version}/beckon-#{version}-x86_64-unknown-linux-gnu.tar.gz"
-      sha256 "71c9896169b4395d0e266c39f50ea25649f15c52ace8a7a1fcb6cff70451bf59"
+      sha256 "de3b922e902cb32dcbb70156f108068ddcfe5e907ec6a354e69f0bd911bbdb84"
     end
   end
 
@@ -76,10 +76,10 @@ class Beckon < Formula
     service do
       # `--log` here is a DECLARATION, not a redirect: launchd already writes
       # this file through the two paths below, and beckon must not be a second
-      # writer on the same fd. It is passed so the tray's `Open log` and the
-      # System page's log row can be drawn at all -- without it beckon has no
-      # way to learn where launchd put the file, and both were omitted over a
-      # log that exists. Keep the three paths identical.
+      # writer on the same fd. It is passed so the menu bar's `Open Log` row
+      # can be drawn at all -- without it beckon has no way to learn where
+      # launchd put the file, and the row is omitted over a log that exists.
+      # Keep the three paths identical.
       # **The executable INSIDE the bundle, not `opt_bin/"beckon"`.** Both
       # resolve to the same file today, but only this spelling says why the
       # bundle exists -- and it does not depend on the `bin` symlink surviving a
